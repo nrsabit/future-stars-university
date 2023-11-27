@@ -8,8 +8,6 @@ import {
   TStudent,
   UserName,
 } from './student.interface';
-import bcrypt from 'bcrypt';
-import config from '../../config';
 
 const UserNameSchema = new Schema<UserName>({
   firstName: {
@@ -50,20 +48,14 @@ const LocalGuardianSchema = new Schema<TLocalGuardian>({
 // student schema for static instance method.
 const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
   {
-    // the student schema for custom instance method.
-    // const StudentSchema = new Schema<
-    //   TStudent,
-    //   StudentModelForInstance,
-    //   StudentMethods
-    // >({
     id: { type: String, required: true, unique: true },
-    password: { type: String, required: true, maxlength: 20 },
+    user : {type : Schema.Types.ObjectId, required : true, unique: true, ref : 'User'},
     name: { type: UserNameSchema, required: true },
     gender: {
       type: String,
       enum: {
-        values: ['Female', 'Male', 'Other'],
-        message: 'Value Must be mail or female',
+        values: ['female', 'male', 'other'],
+        message: 'Value Must be male or female',
       },
       required: true,
     },
@@ -89,30 +81,11 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
     guardian: { type: GuardianSchema, required: true },
     localGuardian: { type: LocalGuardianSchema, required: true },
     profileImg: { type: String, required: true },
-    isActive: {
-      type: String,
-      enum: { values: ['active', 'blocked'] },
-      default: 'active',
-    },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   { toJSON: { virtuals: true } },
 );
 
-// pre hook for save. to convert the password as hash. will run before the call
-StudentSchema.pre('save', async function (next) {
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-
-// post hook for save. to convert the password as empty. will run after the call.
-StudentSchema.post('save', async function (doc, next) {
-  doc.password = '';
-  next();
-});
 
 // query hook. to remove the isDeleted : true data.
 StudentSchema.pre('find', function (next) {
