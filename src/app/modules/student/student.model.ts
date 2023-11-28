@@ -90,14 +90,13 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
 // query hook. to remove the isDeleted : true data.
 StudentSchema.pre('find', function (next) {
   this.find({ isDeleted: { $ne: true } });
-  console.log(this);
   next();
 });
 
 // removing deleted data for findOne.
 StudentSchema.pre('findOne', function (next) {
   this.findOne({ isDeleted: { $ne: true } });
-  console.log(this);
+  // console.log(this); to console the query
   next();
 });
 

@@ -1,27 +1,33 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 // import studentValidationSchema from "../student/student.validation";
-import { UserServices } from "./user.service";
+import { UserServices } from './user.service';
+import responseHandler from '../../utils/responseHandler';
+import httpStatus from 'http-status';
 
-const CreateStudentController = async (req: Request, res: Response) => {
-    try {
-      const { student: studentData  } = req.body;
-      const {password} = req.body
+const CreateStudentController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { student: studentData } = req.body;
+    const { password } = req.body;
     //   const zodParsedData = studentValidationSchema.parse(studentData);
-      const result = await UserServices.CreateStudentService(password, studentData);
-      res.status(200).json({
-        success: true,
-        message: 'Student Created Successfully',
-        data: result,
-      });
-    } catch (err : any) {
-      res.status(500).json({
-        success: false,
-        message: err.message || 'Something went wrong',
-        error: err,
-      });
-    }
-  };
-
-  export const UserControllers = {
-    CreateStudentController
+    const result = await UserServices.CreateStudentService(
+      password,
+      studentData,
+    );
+    responseHandler(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Student Created Successfully',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
   }
+};
+
+export const UserControllers = {
+  CreateStudentController,
+};
