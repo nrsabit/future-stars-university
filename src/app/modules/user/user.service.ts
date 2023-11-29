@@ -5,8 +5,8 @@ import { TUser } from './user.interface';
 import { UserModel } from './user.model';
 
 const CreateStudentService = async (
-  password: string,
   studentData: TStudent,
+  password: string,
 ) => {
   const id = '203000001';
   const userPass = password || (config.default_pass as string);

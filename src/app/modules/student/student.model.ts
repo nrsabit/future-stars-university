@@ -84,7 +84,7 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
     profileImg: { type: String, required: true },
     isDeleted: { type: Boolean, required: true, default: false },
   },
-  { toJSON: { virtuals: true } },
+  { toJSON: { virtuals: true }, timestamps: true },
 );
 
 
