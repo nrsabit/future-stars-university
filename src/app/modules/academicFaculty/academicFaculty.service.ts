@@ -18,7 +18,7 @@ const GetSingleAcademicFacultiesService = async (facultyId: string) => {
 
 const UpdateSingleAcademicFacultiesService = async (
   facultyId: string,
-  payLoad: TAcademicFaculty,
+  payLoad: Partial<TAcademicFaculty>,
 ) => {
   const result = await AcademicFacultyModel.findByIdAndUpdate(
     facultyId,
