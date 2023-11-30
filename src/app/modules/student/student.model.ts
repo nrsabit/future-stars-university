@@ -15,8 +15,8 @@ const UserNameSchema = new Schema<UserName>({
     required: [true, 'First Name is Required'],
     validate: {
       validator: function (value: string) {
-        const words = value.toLowerCase().slice(1)
-        const capitalizedWord = value.charAt(0).toUpperCase() + words
+        const words = value.toLowerCase().slice(1);
+        const capitalizedWord = value.charAt(0).toUpperCase() + words;
         return value === capitalizedWord;
       },
       message: 'First Name is not in Capitalized Format.',
@@ -50,7 +50,12 @@ const LocalGuardianSchema = new Schema<TLocalGuardian>({
 const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
   {
     id: { type: String, required: true, unique: true },
-    user : {type : Schema.Types.ObjectId, required : true, unique: true, ref : 'User'},
+    user: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      ref: 'User',
+    },
     name: { type: UserNameSchema, required: true },
     gender: {
       type: String,
@@ -61,7 +66,7 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
       required: true,
     },
     dateOfBirth: { type: String },
-    email: { type: String },
+    email: { type: String , unique : true},
     contactNo: { type: String },
     emergencyContactNo: { type: String },
     bloodGroup: {
@@ -82,11 +87,15 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
     guardian: { type: GuardianSchema, required: true },
     localGuardian: { type: LocalGuardianSchema, required: true },
     profileImg: { type: String, required: true },
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'AcademicSemester',
+    },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   { toJSON: { virtuals: true }, timestamps: true },
 );
-
 
 // query hook. to remove the isDeleted : true data.
 StudentSchema.pre('find', function (next) {

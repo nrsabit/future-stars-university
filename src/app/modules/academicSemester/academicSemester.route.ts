@@ -6,7 +6,9 @@ import { AcademicSemesterControllers } from './academicSemester.controller';
 const router = Router();
 router.post(
   '/create-academic-semester',
-  validateRequest(AcademicSemisterValidations.AcademicSemesterValidationSchema),
+  validateRequest(
+    AcademicSemisterValidations.createAcademicSemesterValidationSchema,
+  ),
   AcademicSemesterControllers.CreateAcademicSemesterController,
 );
 
@@ -19,7 +21,9 @@ router.get(
 
 router.patch(
   '/:semesterId',
-  validateRequest(AcademicSemisterValidations.AcademicSemesterValidationSchema),
+  validateRequest(
+    AcademicSemisterValidations.updateAcademicSemesterValidationSchema,
+  ),
   AcademicSemesterControllers.UpdateSingleAcademicSemesterController,
 );
 
