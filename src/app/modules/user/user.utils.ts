@@ -8,15 +8,23 @@ const getLastStudent = async () => {
   )
     .sort({ createdAt: -1 })
     .lean();
-  return lastStudent?.id.substring(6) || undefined;
+  return lastStudent?.id || undefined;
 };
 
-const generateUserId = async (academicSemester: TAcademicSemester) => {
-  const currentId = (await getLastStudent()) || (0).toString();
-  const incrementId = (Number(currentId )+ 1)
-    .toString()
-    .padStart(4, '0');
-  const generatedId = `${academicSemester.year}${academicSemester.code}${incrementId}`;
+const generateUserId = async (payload: TAcademicSemester) => {
+  let currentId = (0).toString();
+  const lastStudent = await getLastStudent();
+  const lastStudentYear = lastStudent?.substring(0, 4);
+  const lastStudentSemesterCode = lastStudent?.substring(4, 6);
+  if (
+    lastStudent &&
+    lastStudentYear === payload.year &&
+    lastStudentSemesterCode === payload.code
+  ) {
+    currentId = lastStudent.substring(6);
+  }
+  const incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+  const generatedId = `${payload.year}${payload.code}${incrementId}`;
   return generatedId;
 };
 

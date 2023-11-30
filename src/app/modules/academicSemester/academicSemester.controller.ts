@@ -10,7 +10,7 @@ const CreateAcademicSemesterController = catchAsync(async (req, res) => {
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic Semester Created Successfully',
+    message: 'Academic Semester is Created Successfully',
     data: result,
   });
 });
@@ -21,7 +21,7 @@ const GetAllAcademicSemesterController = catchAsync(async (req, res) => {
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic Semesters retrieved Successfully',
+    message: 'Academic Semesters are retrieved Successfully',
     data: result,
   });
 });
@@ -33,7 +33,7 @@ const GetSingleAcademicSemesterController = catchAsync(async (req, res) => {
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic Semester retrieved Successfully',
+    message: 'Academic Semester is retrieved Successfully',
     data: result,
   });
 });
@@ -48,7 +48,7 @@ const UpdateSingleAcademicSemesterController = catchAsync(async (req, res) => {
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic Semester Updated Successfully',
+    message: 'Academic Semester is Updated Successfully',
     data: result,
   });
 });
