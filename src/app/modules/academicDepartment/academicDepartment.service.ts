@@ -9,12 +9,16 @@ const CreateAcademicDepartmentService = async (
 };
 
 const GetAllAcademicDepartmentsService = async () => {
-  const result = await AcademicDepartmentModel.find();
+  const result =
+    await AcademicDepartmentModel.find().populate('academicFaculty');
   return result;
 };
 
 const GetSingleAcademicDepartmentsService = async (departmentId: string) => {
-  const result = await AcademicDepartmentModel.findById(departmentId);
+  const result =
+    await AcademicDepartmentModel.findById(departmentId).populate(
+      'academicFaculty',
+    );
   return result;
 };
 
@@ -22,8 +26,8 @@ const UpdateSingleAcademicDepartmentsService = async (
   departmentId: string,
   payload: Partial<TAcademicDepartment>,
 ) => {
-  const result = await AcademicDepartmentModel.findByIdAndUpdate(
-    departmentId,
+  const result = await AcademicDepartmentModel.findOneAndUpdate(
+    { _id: departmentId },
     payload,
   );
   return result;

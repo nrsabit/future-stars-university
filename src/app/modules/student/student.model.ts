@@ -92,6 +92,7 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
       required: true,
       ref: 'AcademicSemester',
     },
+    academicDepartment : {type : Schema.Types.ObjectId, required : true, ref : 'AcademicDepartment'},
     isDeleted: { type: Boolean, required: true, default: false },
   },
   { toJSON: { virtuals: true }, timestamps: true },
