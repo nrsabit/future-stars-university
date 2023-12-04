@@ -3,6 +3,7 @@ import { StudentModel } from './student.model';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { UserModel } from '../user/user.model';
+import { TStudent } from './student.interface';
 
 // services for student.
 const GetAllStudentsService = async () => {
@@ -22,6 +23,11 @@ const GetSingleStudentService = async (studentId: string) => {
       path: 'academicDepartment',
       populate: { path: 'academicFaculty' },
     });
+  return result;
+};
+
+const UpdateStudentService = async (id: string, payLoad: Partial<TStudent>) => {
+  const result = await StudentModel.findOneAndUpdate({ id }, payLoad, { new: true });
   return result;
 };
 
@@ -57,6 +63,7 @@ const DeleteStudentService = async (studentId: string) => {
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
+    throw new Error('Student Deletion was not completed');
   }
 };
 
@@ -64,4 +71,5 @@ export const StudentServices = {
   GetAllStudentsService,
   GetSingleStudentService,
   DeleteStudentService,
+  UpdateStudentService,
 };

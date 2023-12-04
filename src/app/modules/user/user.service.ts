@@ -45,6 +45,7 @@ const CreateStudentService = async (
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
+    throw new Error('Student Creation Failed');
   }
 };
 

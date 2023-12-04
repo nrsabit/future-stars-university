@@ -26,7 +26,7 @@ const UpdateSingleAcademicDepartmentsService = async (
   departmentId: string,
   payload: Partial<TAcademicDepartment>,
 ) => {
-  const result = await AcademicDepartmentModel.findOneAndUpdate(
+  const result = await AcademicDepartmentModel.findByIdAndUpdate(
     { _id: departmentId },
     payload,
   );
