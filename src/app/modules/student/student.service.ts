@@ -27,7 +27,32 @@ const GetSingleStudentService = async (studentId: string) => {
 };
 
 const UpdateStudentService = async (id: string, payLoad: Partial<TStudent>) => {
-  const result = await StudentModel.findOneAndUpdate({ id }, payLoad, { new: true });
+  const { name, guardian, localGuardian, ...remainingData } = payLoad;
+  const modifiedUpdatedData: Record<string, unknown> = { ...remainingData };
+
+  if (name && Object.keys(name)) {
+    for (const [key, value] of Object.entries(name)) {
+      modifiedUpdatedData[`name.${key}`] = value;
+    }
+  }
+
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
+      modifiedUpdatedData[`guardian.${key}`] = value;
+    }
+  }
+
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
+      modifiedUpdatedData[`localGuardian.${key}`] = value;
+    }
+  }
+
+  const result = await StudentModel.findOneAndUpdate(
+    { id },
+    modifiedUpdatedData,
+    { new: true },
+  );
   return result;
 };
 
