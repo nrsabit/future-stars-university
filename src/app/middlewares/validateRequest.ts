@@ -14,5 +14,4 @@ const validateRequest = (schema: AnyZodObject) => {
   };
 };
 
-
-export default validateRequest
+export default validateRequest;
