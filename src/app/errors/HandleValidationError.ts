@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
+import { TGenericErrorResponse } from '../interface/error';
 
-const HandleValidationError = (err: mongoose.Error.ValidationError) => {
+const HandleValidationError = (
+  err: mongoose.Error.ValidationError,
+): TGenericErrorResponse => {
   const errorSources = Object.values(err.errors).map(
     (val: mongoose.Error.ValidatorError | mongoose.Error.CastError) => {
       return {
@@ -10,11 +13,11 @@ const HandleValidationError = (err: mongoose.Error.ValidationError) => {
     },
   );
 
+  const status = 400;
   return {
-    status: 400,
+    status,
     message: 'Validation Error',
     errorSources,
-    stack: err?.stack,
   };
 };
 

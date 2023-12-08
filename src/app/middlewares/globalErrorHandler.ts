@@ -6,10 +6,13 @@ import { ZodError } from 'zod';
 import config from '../config';
 import handleZodError from '../errors/HandleZodError';
 import HandleValidationError from '../errors/HandleValidationError';
+import handleCastError from '../errors/HandleCastError';
+import handleDuplicateError from '../errors/HandleDuplicateError';
+import AppError from '../errors/AppError';
 
 const globalErrorHandler: ErrorRequestHandler = (err: any, req, res, next) => {
-  let status = err.statusCode || 500;
-  let message = err.message || 'Something went wrong';
+  let status = 500;
+  let message = 'Something went wrong';
   let errorSources: TErrorSources = [
     {
       path: '',
@@ -28,12 +31,40 @@ const globalErrorHandler: ErrorRequestHandler = (err: any, req, res, next) => {
     status = simplifiedMongooseError.status;
     message = simplifiedMongooseError.message;
     errorSources = simplifiedMongooseError.errorSources;
+  } else if (err.name === 'CastError') {
+    const simplifiedCastError = handleCastError(err);
+    status = simplifiedCastError.status;
+    message = simplifiedCastError.message;
+    errorSources = simplifiedCastError.errorSources;
+  } else if (err.code === 11000) {
+    const simplifiedDuplicateError = handleDuplicateError(err);
+    status = simplifiedDuplicateError.status;
+    message = simplifiedDuplicateError.message;
+    errorSources = simplifiedDuplicateError.errorSources;
+  } else if (err instanceof AppError) {
+    status = err?.statusCode;
+    message = err?.message;
+    errorSources = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
+  } else if (err instanceof Error) {
+    message = err?.message;
+    errorSources = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
   }
 
   res.status(status).json({
     success: false,
     message,
     errorSources,
+    err,
     stack: config.NODE_ENV === 'development' ? err?.stack : null,
   });
 };

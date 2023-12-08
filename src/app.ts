@@ -13,9 +13,10 @@ app.use(cors());
 // application routes.
 app.use('/api/v1', router);
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('hello world');
+app.get('/',  async (req: Request, res: Response) => {
+  res.send('Future Starts University');
 });
+
 
 // global error handler funciton.
 app.use(globalErrorHandler);
