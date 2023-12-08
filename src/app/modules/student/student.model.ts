@@ -119,7 +119,7 @@ StudentSchema.pre('aggregate', function (next) {
 
 // adding the virtual field for fullName.
 StudentSchema.virtual('fullName').get(function () {
-  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+  return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
 });
 
 // for custom instance method.

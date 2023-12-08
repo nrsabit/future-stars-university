@@ -18,7 +18,7 @@ const GetAllStudentsService = async (query: Record<string, unknown>) => {
 
   // filtering functionality.
   const queryObj = { ...query };
-  const excludedQueries = ['email', 'sort', 'limit'];
+  const excludedQueries = ['email', 'sort', 'limit', 'page', 'fields'];
   excludedQueries.forEach((element) => delete queryObj[element]);
   const filterQuery = searchQuery
     .find(queryObj)
@@ -32,11 +32,23 @@ const GetAllStudentsService = async (query: Record<string, unknown>) => {
   const sort = query?.sort ? query.sort : '-createdAt';
   const sortQuery = filterQuery.sort(sort as string);
 
-  // limit functionality
-  const limit = query?.limit ? query.limit : 1;
-  const result = await sortQuery.limit(limit as number);
+  // pagination functionality
+  const limit = query?.limit ? Number(query.limit) : 1; // it will be used for limit also
+  const page = query?.page ? Number(query.page) : 1;
+  const skip = limit && page ? (page - 1) * limit : 0;
+  const paginateQuery = sortQuery.skip(skip);
 
-  return result;
+  //limit functionality
+  const limitQuery = paginateQuery.limit(limit as number);
+
+  // field filtering.
+  let fields = '-__v';
+  if (query.fields) {
+    fields = (query.fields as string).split(',').join(' ');
+  }
+  const fieldFilteringQuery = await limitQuery.select(fields);
+
+  return fieldFilteringQuery;
 };
 
 const GetSingleStudentService = async (studentId: string) => {
