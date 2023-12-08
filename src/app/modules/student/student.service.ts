@@ -6,13 +6,36 @@ import { UserModel } from '../user/user.model';
 import { TStudent } from './student.interface';
 
 // services for student.
-const GetAllStudentsService = async () => {
-  const result = await StudentModel.find()
+const GetAllStudentsService = async (query: Record<string, unknown>) => {
+  // searchTerm functionality.
+  const searchTerm = query?.searchTerm ? query.searchTerm : '';
+  const studentSearchableFields = ['email', 'presentAddress', 'name.firstName'];
+  const searchQuery = StudentModel.find({
+    $or: studentSearchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: 'i' },
+    })),
+  });
+
+  // filtering functionality.
+  const queryObj = { ...query };
+  const excludedQueries = ['email', 'sort', 'limit'];
+  excludedQueries.forEach((element) => delete queryObj[element]);
+  const filterQuery = searchQuery
+    .find(queryObj)
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
       populate: { path: 'academicFaculty' },
     });
+
+  // sorting funcitonality
+  const sort = query?.sort ? query.sort : '-createdAt';
+  const sortQuery = filterQuery.sort(sort as string);
+
+  // limit functionality
+  const limit = query?.limit ? query.limit : 1;
+  const result = await sortQuery.limit(limit as number);
+
   return result;
 };
 

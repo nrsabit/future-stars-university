@@ -6,7 +6,7 @@ import catchAsync from '../../utils/catchAsync';
 // the controllers for student.
 
 const GetAllStudentsController = catchAsync(async (req, res) => {
-  const result = await StudentServices.GetAllStudentsService();
+  const result = await StudentServices.GetAllStudentsService(req.query);
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
