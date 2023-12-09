@@ -66,7 +66,7 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
       required: true,
     },
     dateOfBirth: { type: String },
-    email: { type: String , unique : true},
+    email: { type: String, unique: true },
     contactNo: { type: String },
     emergencyContactNo: { type: String },
     bloodGroup: {
@@ -92,7 +92,11 @@ const StudentSchema = new Schema<TStudent, StudentModelForStatic>(
       required: true,
       ref: 'AcademicSemester',
     },
-    academicDepartment : {type : Schema.Types.ObjectId, required : true, ref : 'AcademicDepartment'},
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'AcademicDepartment',
+    },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   { toJSON: { virtuals: true }, timestamps: true },
@@ -124,13 +128,13 @@ StudentSchema.virtual('fullName').get(function () {
 
 // for custom instance method.
 StudentSchema.methods.isUserExists = async (id: string) => {
-  const existingUser = await StudentModel.findOne({ id });
+  const existingUser = await StudentModel.findById(id);
   return existingUser;
 };
 
 // for custom static method.
 StudentSchema.statics.isUserExists = async (id: string) => {
-  const existingUser = await StudentModel.findOne({ id });
+  const existingUser = await StudentModel.findById(id);
   return existingUser;
 };
 
