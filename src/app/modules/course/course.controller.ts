@@ -14,7 +14,7 @@ const createCourseController = catchAsync(async (req, res) => {
 });
 
 const getAllCoursesController = catchAsync(async (req, res) => {
-  const result = await CourseServices.getAllCoursesService();
+  const result = await CourseServices.getAllCoursesService(req.query);
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -30,6 +30,17 @@ const getSingleCourseController = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Course is Retrieved Successfully',
+    data: result,
+  });
+});
+
+const updateSingleCourseController = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await CourseServices.updateSingleCourseService(id, req.body);
+  responseHandler(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Course is Updated Successfully',
     data: result,
   });
 });
@@ -50,4 +61,5 @@ export const CourseControllers = {
   getAllCoursesController,
   getSingleCourseController,
   deleteCourseController,
+  updateSingleCourseController
 };
