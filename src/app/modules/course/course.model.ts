@@ -1,10 +1,13 @@
 import { Schema, model } from 'mongoose';
 import { TCourseFaculty, Tcourse } from './course.interface';
 
-const preRequisiteCoursesSchema = new Schema({
-  course: { type: Schema.Types.ObjectId, required: true, ref: 'Course' },
-  isDeleted: { type: Boolean, default: false },
-});
+const preRequisiteCoursesSchema = new Schema(
+  {
+    course: { type: Schema.Types.ObjectId, required: true, ref: 'Course' },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
 
 const courseSchema = new Schema<Tcourse>({
   title: { type: String, unique: true, required: true, trim: true },
