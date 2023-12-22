@@ -9,6 +9,7 @@ const config = {
   database_url: process.env.DATABASE_URL,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   default_pass: process.env.DEFAULT_PASS,
+  jwt_access_token: process.env.JWT_ACCESS_TOKEN,
 };
 
 export default config;

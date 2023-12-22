@@ -24,6 +24,7 @@ const CreateStudentService = async (
   password: string,
 ) => {
   const userData: Partial<TUser> = {};
+  userData.needsPasswordChange = password? false : true
   userData.password = password || (config.default_pass as string);
   userData.role = 'student';
 
@@ -63,6 +64,7 @@ const CreateFacultyService = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
 
   //if password is not given , use deafult password
+  userData.needsPasswordChange = password? false : true
   userData.password = password || (config.default_pass as string);
 
   //set student role
@@ -119,6 +121,7 @@ const CreateAdminService = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
 
   //if password is not given , use deafult password
+  userData.needsPasswordChange = password? false : true
   userData.password = password || (config.default_pass as string);
 
   //set student role
