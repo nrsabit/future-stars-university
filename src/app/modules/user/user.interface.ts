@@ -5,7 +5,7 @@ export interface TUser {
   id: string;
   password: string;
   needsPasswordChange: boolean;
-  passwordChangedAt? : Date;
+  passwordChangedAt?: Date;
   role: 'admin' | 'faculty' | 'student';
   status: 'active' | 'blocked';
   isDeleted: boolean;
@@ -19,4 +19,8 @@ export interface UserStaticsModel extends Model<TUser> {
     plainTextedPassword: string,
     hashedPassword: string,
   ): Promise<boolean>;
+  isJWTIssuedTimeBeforePasswordChanged(
+    passwordChangedTime: Date,
+    tokenIssuedTime: number,
+  ): boolean;
 }

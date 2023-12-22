@@ -8,7 +8,7 @@ const UserSchema = new Schema<TUser, UserStaticsModel>(
     id: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: 0 },
     needsPasswordChange: { type: Boolean, required: true, default: true },
-    passwordChangedAt: {type: Date},
+    passwordChangedAt: { type: Date },
     role: { type: String, enum: ['admin', 'student', 'faculty'] },
     status: { type: String, enum: ['active', 'blocked'], default: 'active' },
     isDeleted: { type: Boolean, default: false },
@@ -32,15 +32,29 @@ UserSchema.post('save', async function (doc, next) {
   next();
 });
 
+// static method to check the user exists or not
 UserSchema.statics.isUserExistsByCustomId = async function (id: string) {
   return await UserModel.findOne({ id }).select('+password');
 };
 
+// static method to check the password is matched for the user.
 UserSchema.statics.isPasswordMatched = async function (
   plainTextedPassword,
   hashedPassword,
 ) {
   return await bcrypt.compare(plainTextedPassword, hashedPassword);
+};
+
+// static method to check the password changed after token issue or not.
+UserSchema.statics.isJWTIssuedTimeBeforePasswordChanged = function (
+  passwordChangedTime: Date,
+  tokenIssuedTime: number,
+) {
+  const passwordChangedTimeMiliseconds = new Date(
+    passwordChangedTime,
+  ).getTime() / 1000;
+
+  return passwordChangedTimeMiliseconds > tokenIssuedTime;
 };
 
 export const UserModel = model<TUser, UserStaticsModel>('User', UserSchema);
