@@ -61,7 +61,7 @@ const adminSchema = new Schema<TAdmin, AdminStaticModel>(
       type: String,
       required: [true, 'Emergency contact number is required'],
     },
-    bloogGroup: {
+    bloodGroup: {
       type: String,
       enum: {
         values: BloodGroup,
