@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import { TUser, UserStaticsModel } from './user.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
+import { USER_STATUS } from './user.constant';
 
 const UserSchema = new Schema<TUser, UserStaticsModel>(
   {
@@ -11,7 +12,7 @@ const UserSchema = new Schema<TUser, UserStaticsModel>(
     needsPasswordChange: { type: Boolean, required: true, default: true },
     passwordChangedAt: { type: Date },
     role: { type: String, enum: ['admin', 'student', 'faculty'] },
-    status: { type: String, enum: ['active', 'blocked'], default: 'active' },
+    status: { type: String, enum: USER_STATUS, default: 'active' },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true },

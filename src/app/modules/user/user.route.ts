@@ -28,4 +28,16 @@ router.post(
   UserControllers.CreateAdminController,
 );
 
+router.get(
+  '/me',
+  auth(USER_ROLES.admin, USER_ROLES.faculty, USER_ROLES.student),
+  UserControllers.GetMeController,
+);
+
+router.post(
+  '/change-status/:id',
+  auth(USER_ROLES.admin),
+  UserControllers.ChangeUserStatusController,
+);
+
 export const UserRoutes = router;

@@ -25,14 +25,14 @@ const CreateStudentService = async (
   password: string,
 ) => {
   const userData: Partial<TUser> = {};
-  userData.needsPasswordChange = password? false : true
+  userData.needsPasswordChange = password ? false : true;
   userData.password = password || (config.default_pass as string);
 
   // adding the student role for the user.
   userData.role = 'student';
 
-  // adding the student email for the user 
-  userData.email = studentData.email
+  // adding the student email for the user
+  userData.email = studentData.email;
 
   const academicSemester = await AcademicSemesterModel.findById(
     studentData.admissionSemester,
@@ -70,14 +70,14 @@ const CreateFacultyService = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
 
   //if password is not given , use deafult password
-  userData.needsPasswordChange = password? false : true
+  userData.needsPasswordChange = password ? false : true;
   userData.password = password || (config.default_pass as string);
 
   // adding the faculty role for the user.
   userData.role = 'faculty';
 
-  // adding the faculty email for the user 
-  userData.email = payload.email
+  // adding the faculty email for the user
+  userData.email = payload.email;
 
   // find academic department info
   const academicDepartment = await AcademicDepartmentModel.findById(
@@ -130,15 +130,14 @@ const CreateAdminService = async (password: string, payload: TAdmin) => {
   const userData: Partial<TUser> = {};
 
   //if password is not given , use deafult password
-  userData.needsPasswordChange = password? false : true
+  userData.needsPasswordChange = password ? false : true;
   userData.password = password || (config.default_pass as string);
 
   // adding the admin role for the user.
   userData.role = 'admin';
 
-  // adding the admin email for the user 
-  userData.email = payload.email
-
+  // adding the admin email for the user
+  userData.email = payload.email;
 
   const session = await mongoose.startSession();
 
@@ -176,8 +175,33 @@ const CreateAdminService = async (password: string, payload: TAdmin) => {
   }
 };
 
+const getMeService = async (userId: string, role: string) => {
+  let result = null;
+  if (role === 'admin') {
+    result = await AdminModel.findOne({ id: userId }).populate('user');
+  }
+  if (role === 'faculty') {
+    result = await FacultyModel.findOne({ id: userId }).populate('user');
+  }
+  if (role === 'student') {
+    result = await StudentModel.findOne({ id: userId })
+      .populate('admissionSemester')
+      .populate('academicDepartment')
+      .populate('user');
+  }
+
+  return result;
+};
+
+const changeUserStatusService = async (id: string, payload: { status: string }) => {
+  const result = UserModel.findByIdAndUpdate(id, payload, { new: true });
+  return result;
+};
+
 export const UserServices = {
   CreateStudentService,
   CreateFacultyService,
   CreateAdminService,
+  getMeService,
+  changeUserStatusService,
 };
