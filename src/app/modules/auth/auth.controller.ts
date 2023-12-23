@@ -2,19 +2,28 @@ import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import responseHandler from '../../utils/responseHandler';
 import { AuthServices } from './auth.service';
+import config from '../../config';
 
 const LoginUserController = catchAsync(async (req, res) => {
   const result = await AuthServices.LoginUserService(req.body);
+  const { accessToken, refreshToken, needsPasswordChange } = result;
+
+  // set the refresh token in cookie.
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+  });
+
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'User Successfully logged in',
-    data: result,
+    data: { accessToken, needsPasswordChange },
   });
 });
 
 const ChangePasswordController = catchAsync(async (req, res) => {
-  const {userId} = req.user
+  const { userId } = req.user;
   const result = await AuthServices.ChangePasswordService(userId, req.body);
   responseHandler(res, {
     statusCode: httpStatus.OK,
@@ -24,7 +33,19 @@ const ChangePasswordController = catchAsync(async (req, res) => {
   });
 });
 
+const UseRefreshTokenController = catchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
+  const result = await AuthServices.useRefreshTokenService(refreshToken);
+  responseHandler(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Token Updated Successfully',
+    data: result,
+  });
+});
+
 export const Authcontrollers = {
   LoginUserController,
   ChangePasswordController,
+  UseRefreshTokenController,
 };
