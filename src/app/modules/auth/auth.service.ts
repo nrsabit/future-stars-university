@@ -6,6 +6,7 @@ import config from '../../config';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { sendEmail } from '../../utils/sendMail';
 
 const LoginUserService = async (payload: TLoginUser) => {
   // check if the user is exists or not.
@@ -149,8 +150,95 @@ const useRefreshTokenService = async (token: string) => {
   return { accessToken };
 };
 
+// forget password service.
+const forgetPasswordService = async (userId: string) => {
+  // check if the user is exists or not.
+  const user = await UserModel.isUserExistsByCustomId(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User Not Found..!');
+  }
+
+  // check if the user deleted or not.
+  if (user.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'User Is Deleted..!');
+  }
+
+  // check if the user is blocked or not.
+  if (user.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'User Is Blocked..!');
+  }
+
+  // authorize the user using jwt
+  const jwtPayload = {
+    userId: user?.id,
+    role: user?.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_token as string,
+    '10m',
+  );
+
+  const generatedLink = `${config.password_reset_ui_lik}?id=${user?.id}&token=${accessToken}`;
+  sendEmail(user?.email, generatedLink);
+  return null;
+};
+
+// Reset password service.
+const resetPasswordService = async (
+  token: string,
+  payload: { id: string; password: string },
+) => {
+  // check if the user is exists or not.
+  const user = await UserModel.isUserExistsByCustomId(payload?.id);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User Not Found..!');
+  }
+
+  // check if the user deleted or not.
+  if (user.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'User Is Deleted..!');
+  }
+
+  // check if the user is blocked or not.
+  if (user.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'User Is Blocked..!');
+  }
+
+  // check if the token is valid
+  const decoded = jwt.verify(
+    token,
+    config.jwt_access_token as string,
+  ) as JwtPayload;
+
+  // check if the decoded id and client id is same or not.
+  if (decoded.userId !== payload.id) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Forbidden Access');
+  }
+
+  // encrypt the newly added password.
+  const hashedNewPassword = await bcrypt.hash(
+    payload?.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  await UserModel.findOneAndUpdate(
+    { id: decoded.userId, role: decoded.role },
+    {
+      password: hashedNewPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  );
+
+  return null;
+};
+
 export const AuthServices = {
   LoginUserService,
   ChangePasswordService,
   useRefreshTokenService,
+  forgetPasswordService,
+  resetPasswordService,
 };

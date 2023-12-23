@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 const UserSchema = new Schema<TUser, UserStaticsModel>(
   {
     id: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: 0 },
     needsPasswordChange: { type: Boolean, required: true, default: true },
     passwordChangedAt: { type: Date },

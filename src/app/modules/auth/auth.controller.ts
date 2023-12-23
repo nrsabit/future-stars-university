@@ -44,8 +44,35 @@ const UseRefreshTokenController = catchAsync(async (req, res) => {
   });
 });
 
+const ForgetPasswordController = catchAsync(async (req, res) => {
+  const { id } = req.body;
+  const result = await AuthServices.forgetPasswordService(id);
+  responseHandler(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Forget Password Link Generated Successfully',
+    data: result,
+  });
+});
+
+const ResetPasswordController = catchAsync(async (req, res) => {
+  const token = req?.headers?.authorization;
+  const result = await AuthServices.resetPasswordService(
+    token as string,
+    req.body,
+  );
+  responseHandler(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Password Reset Successful',
+    data: result,
+  });
+});
+
 export const Authcontrollers = {
   LoginUserController,
   ChangePasswordController,
   UseRefreshTokenController,
+  ForgetPasswordController,
+  ResetPasswordController
 };

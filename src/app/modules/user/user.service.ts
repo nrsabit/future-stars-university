@@ -18,6 +18,7 @@ import { TFaculty } from '../faculty/faculty.interface';
 import { AcademicDepartmentModel } from '../academicDepartment/academicDepartment.model';
 import { FacultyModel } from '../faculty/faculty.model';
 import { AdminModel } from '../admin/admin.model';
+import { TAdmin } from '../admin/admin.interface';
 
 const CreateStudentService = async (
   studentData: TStudent,
@@ -26,7 +27,12 @@ const CreateStudentService = async (
   const userData: Partial<TUser> = {};
   userData.needsPasswordChange = password? false : true
   userData.password = password || (config.default_pass as string);
+
+  // adding the student role for the user.
   userData.role = 'student';
+
+  // adding the student email for the user 
+  userData.email = studentData.email
 
   const academicSemester = await AcademicSemesterModel.findById(
     studentData.admissionSemester,
@@ -67,8 +73,11 @@ const CreateFacultyService = async (password: string, payload: TFaculty) => {
   userData.needsPasswordChange = password? false : true
   userData.password = password || (config.default_pass as string);
 
-  //set student role
+  // adding the faculty role for the user.
   userData.role = 'faculty';
+
+  // adding the faculty email for the user 
+  userData.email = payload.email
 
   // find academic department info
   const academicDepartment = await AcademicDepartmentModel.findById(
@@ -116,7 +125,7 @@ const CreateFacultyService = async (password: string, payload: TFaculty) => {
   }
 };
 
-const CreateAdminService = async (password: string, payload: TFaculty) => {
+const CreateAdminService = async (password: string, payload: TAdmin) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
@@ -124,8 +133,12 @@ const CreateAdminService = async (password: string, payload: TFaculty) => {
   userData.needsPasswordChange = password? false : true
   userData.password = password || (config.default_pass as string);
 
-  //set student role
+  // adding the admin role for the user.
   userData.role = 'admin';
+
+  // adding the admin email for the user 
+  userData.email = payload.email
+
 
   const session = await mongoose.startSession();
 
