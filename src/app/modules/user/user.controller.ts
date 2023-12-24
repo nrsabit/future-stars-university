@@ -5,8 +5,8 @@ import catchAsync from '../../utils/catchAsync';
 
 const CreateStudentController = catchAsync(async (req, res) => {
   const { student: studentData, password } = req.body;
-  //   const zodParsedData = studentValidationSchema.parse(studentData);
-  const result = await UserServices.CreateStudentService(studentData, password);
+  const result = await UserServices.CreateStudentService(req.file, studentData, password);
+
   responseHandler(res, {
     statusCode: httpStatus.OK,
     success: true,

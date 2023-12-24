@@ -19,8 +19,10 @@ import { AcademicDepartmentModel } from '../academicDepartment/academicDepartmen
 import { FacultyModel } from '../faculty/faculty.model';
 import { AdminModel } from '../admin/admin.model';
 import { TAdmin } from '../admin/admin.interface';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
 const CreateStudentService = async (
+  file: any,
   studentData: TStudent,
   password: string,
 ) => {
@@ -44,12 +46,20 @@ const CreateStudentService = async (
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
+    // send the image to cloudinary
+    const imageName = `${userData.id}-${studentData?.name?.firstName}`;
+    const imagePath = file?.path;
+    const { secure_url } = await sendImageToCloudinary(imageName, imagePath);
+    studentData.profileImg = secure_url;
+
     const newUser = await UserModel.create([userData], { session });
     if (!newUser.length) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create a new user');
     }
+
     studentData.id = newUser[0].id;
     studentData.user = newUser[0]._id;
+
     const newStudent = await StudentModel.create([studentData], { session });
     if (!newStudent.length) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create a Student');
@@ -193,7 +203,10 @@ const getMeService = async (userId: string, role: string) => {
   return result;
 };
 
-const changeUserStatusService = async (id: string, payload: { status: string }) => {
+const changeUserStatusService = async (
+  id: string,
+  payload: { status: string },
+) => {
   const result = UserModel.findByIdAndUpdate(id, payload, { new: true });
   return result;
 };
