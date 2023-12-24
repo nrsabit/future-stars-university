@@ -49,7 +49,10 @@ const CreateStudentService = async (
     // send the image to cloudinary
     const imageName = `${userData.id}-${studentData?.name?.firstName}`;
     const imagePath = file?.path;
-    const { secure_url } = await sendImageToCloudinary(imageName, imagePath);
+    const { secure_url } = await (sendImageToCloudinary(
+      imageName,
+      imagePath,
+    ) as Promise<Record<string, any>>);
     studentData.profileImg = secure_url;
 
     const newUser = await UserModel.create([userData], { session });
