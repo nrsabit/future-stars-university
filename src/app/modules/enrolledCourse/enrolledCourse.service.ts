@@ -5,6 +5,8 @@ import { TEnrolledCourse } from './enrolledCourse.interface';
 import { StudentModel } from '../student/student.model';
 import { EnrolledCourseModel } from './enrolledCourse.model';
 import mongoose from 'mongoose';
+import { SemesterRegistrationModel } from '../semesterRegistration/semesterRegistration.model';
+import { CourseModel } from '../course/course.model';
 
 const CreateEnrolledCourseService = async (
   userId: string,
@@ -27,7 +29,7 @@ const CreateEnrolledCourseService = async (
   }
 
   // check if the student is already enrolled to the course.
-  const student = await StudentModel.findOne({ id: userId }).select('_id');
+  const student = await StudentModel.findOne({ id: userId }, { _id: 1 });
   const isStudentAlreadyEnrolled = await EnrolledCourseModel.findOne({
     semesterRegistration: isOfferedCourseExists?.semesterRegistration,
     offeredCourse,
@@ -40,6 +42,58 @@ const CreateEnrolledCourseService = async (
     );
   }
 
+  // the aggregation to find sum of all credits for this student in this semester.
+  // get the semesterRegistration max credit.
+  const semesterRegistration = await SemesterRegistrationModel.findById(
+    isOfferedCourseExists.semesterRegistration,
+  ).select('maxCredit');
+  const maxCredit = semesterRegistration?.maxCredit;
+
+  // get the current course credit.
+  const course = await CourseModel.findById(isOfferedCourseExists.course, {
+    credits: 1,
+  });
+  const currentCredit = course?.credits;
+
+  const enrolledCourses = await EnrolledCourseModel.aggregate([
+    {
+      $match: {
+        semesterRegistration: isOfferedCourseExists.semesterRegistration,
+        student: student?._id,
+      },
+    },
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course',
+        foreignField: '_id',
+        as: 'studentEnrolledCourses',
+      },
+    },
+    {
+      $unwind: '$studentEnrolledCourses',
+    },
+    {
+      $group: {
+        _id: null,
+        totalStudentCredits: { $sum: '$studentEnrolledCourses.credits' },
+      },
+    },
+    {
+      $project: { _id: 0 },
+    },
+  ]);
+
+  // check if the semesterRegistration max credit is less than enrolled courses for this studen credit + current course credit or not.
+  const totalCredits = enrolledCourses[0].totalStudentCredits + currentCredit;
+  if (totalCredits && maxCredit && totalCredits > maxCredit) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'You have exeeded maximum number of credits in this semester',
+    );
+  }
+
+  // now enroll to the course with transaction
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -85,6 +139,38 @@ const CreateEnrolledCourseService = async (
   }
 };
 
+const UpdateEnrolledCourseService = async (
+  facultyId: string,
+  payload: Partial<TEnrolledCourse>,
+) => {
+  const { semesterRegistration, offeredCourse, student } = payload;
+
+  // check the semester registration exists or not.
+  const isSemesterRegistrationExists = await SemesterRegistrationModel.findById(
+    semesterRegistration,
+    { _id: 1 },
+  );
+  if (!isSemesterRegistrationExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Semester Registration Not Found');
+  }
+
+  // check the offered course exists or not.
+  const isOfferedCourseExists = await OfferedCourseModel.findById(
+    offeredCourse,
+    { _id: 1 },
+  );
+  if (!isOfferedCourseExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Offered Course Not Found');
+  }
+
+  // check the student exists or not.
+  const isStudentExists = await StudentModel.findById(student, { _id: 1 });
+  if (!isStudentExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Student Not Found');
+  }
+};
+
 export const EnrolledCourseServices = {
   CreateEnrolledCourseService,
+  UpdateEnrolledCourseService
 };
