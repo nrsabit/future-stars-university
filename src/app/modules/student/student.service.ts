@@ -26,7 +26,8 @@ const GetAllStudentsService = async (query: Record<string, unknown>) => {
     .fieldFilter();
 
   const result = await studentQuery.modelQuery;
-  return result;
+  const meta = await studentQuery.count();
+  return { meta, result };
 };
 
 const GetSingleStudentService = async (id: string) => {
@@ -61,11 +62,9 @@ const UpdateStudentService = async (id: string, payLoad: Partial<TStudent>) => {
     }
   }
 
-  const result = await StudentModel.findByIdAndUpdate(
-    id ,
-    modifiedUpdatedData,
-    { new: true },
-  );
+  const result = await StudentModel.findByIdAndUpdate(id, modifiedUpdatedData, {
+    new: true,
+  });
   return result;
 };
 
@@ -102,7 +101,7 @@ const DeleteStudentService = async (id: string) => {
     await session.commitTransaction();
     await session.endSession();
     return deletedStudent;
-  } catch (err : any) {
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
     throw new Error(err);

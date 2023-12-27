@@ -7,6 +7,8 @@ import { EnrolledCourseModel } from './enrolledCourse.model';
 import mongoose from 'mongoose';
 import { SemesterRegistrationModel } from '../semesterRegistration/semesterRegistration.model';
 import { CourseModel } from '../course/course.model';
+import { FacultyModel } from '../faculty/faculty.model';
+import { calculateGradeAndGradePoints } from './enrolledCourse.utils';
 
 const CreateEnrolledCourseService = async (
   userId: string,
@@ -168,9 +170,69 @@ const UpdateEnrolledCourseService = async (
   if (!isStudentExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'Student Not Found');
   }
+
+  // check the faculty.
+  const isFacultyExists = await FacultyModel.findOne(
+    { id: facultyId },
+    { _id: 1 },
+  );
+
+  if (!isFacultyExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty Not Found');
+  }
+
+  // check if the course belongs to the faculty or not.
+  const isCourseBelongsToTheFaculty = await EnrolledCourseModel.findOne({
+    semesterRegistration,
+    offeredCourse,
+    student,
+    faculty: isFacultyExists?._id,
+  });
+
+  if (!isCourseBelongsToTheFaculty) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'You are not allowed to updated the course',
+    );
+  }
+
+  // now update the data dinamically.
+  const modifiedData: Record<string, unknown> = {
+    ...payload.courseMarks,
+  };
+
+  // check if the finalTerm is added or not.
+  if (payload?.courseMarks?.finalTerm) {
+    const { classTest1, classTest2, midTerm } =
+      isCourseBelongsToTheFaculty.courseMarks;
+    const totalNumber =
+      Math.ceil(classTest1 * 0.1) +
+      Math.ceil(midTerm * 0.3) +
+      Math.ceil(classTest2 * 0.1) +
+      Math.ceil(payload?.courseMarks?.finalTerm * 0.5);
+
+    const gradeAndMarks = calculateGradeAndGradePoints(totalNumber);
+    modifiedData.grade = gradeAndMarks?.grade;
+    modifiedData.gradePoints = gradeAndMarks?.gradePoints;
+    modifiedData.isCompleted = true
+  }
+
+  if (payload.courseMarks && Object.entries(payload.courseMarks).length) {
+    for (const [key, value] of Object.entries(payload.courseMarks)) {
+      modifiedData[`courseMarks.${key}`] = value;
+    }
+  }
+
+  const result = await EnrolledCourseModel.findByIdAndUpdate(
+    isCourseBelongsToTheFaculty._id,
+    modifiedData,
+    { new: true },
+  );
+
+  return result;
 };
 
 export const EnrolledCourseServices = {
   CreateEnrolledCourseService,
-  UpdateEnrolledCourseService
+  UpdateEnrolledCourseService,
 };

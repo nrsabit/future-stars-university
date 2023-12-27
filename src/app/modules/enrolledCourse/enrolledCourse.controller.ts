@@ -19,7 +19,7 @@ const CreateEnrolledCourseController = catchAsync(async (req, res) => {
 
 const UpdateEnrolledCourseController = catchAsync(async (req, res) => {
   const { userId } = req.user;
-  const result = await EnrolledCourseServices.CreateEnrolledCourseService(
+  const result = await EnrolledCourseServices.UpdateEnrolledCourseService(
     userId,
     req.body,
   );
