@@ -11,7 +11,7 @@ const UserSchema = new Schema<TUser, UserStaticsModel>(
     password: { type: String, required: true, select: 0 },
     needsPasswordChange: { type: Boolean, required: true, default: true },
     passwordChangedAt: { type: Date },
-    role: { type: String, enum: ['super-admin', 'admin', 'student', 'faculty'] },
+    role: { type: String, enum: ['superAdmin', 'admin', 'student', 'faculty'] },
     status: { type: String, enum: USER_STATUS, default: 'active' },
     isDeleted: { type: Boolean, default: false },
   },

@@ -18,7 +18,7 @@ const CreateStudentController = catchAsync(async (req, res) => {
 const CreateFacultyController = catchAsync(async (req, res) => {
   const { password, faculty: facultyData } = req.body;
 
-  const result = await UserServices.CreateFacultyService(password, facultyData);
+  const result = await UserServices.CreateFacultyService(req.file, password, facultyData);
 
   responseHandler(res, {
     statusCode: httpStatus.OK,
@@ -31,7 +31,7 @@ const CreateFacultyController = catchAsync(async (req, res) => {
 const CreateAdminController = catchAsync(async (req, res) => {
   const { password, admin: adminData } = req.body;
 
-  const result = await UserServices.CreateAdminService(password, adminData);
+  const result = await UserServices.CreateAdminService(req.file, password, adminData);
 
   responseHandler(res, {
     statusCode: httpStatus.OK,

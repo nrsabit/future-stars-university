@@ -7,7 +7,7 @@ const superUser = {
   email: 'mailbox.sabit@gmail.com',
   password: config.super_admin_password,
   needsPasswordChange: false,
-  role: 'super-admin',
+  role: 'superAdmin',
   status: 'active',
   isDeleted: false,
 };
