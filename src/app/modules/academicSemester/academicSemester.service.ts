@@ -1,8 +1,12 @@
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
-import { AcademicSemesterNameCodeMapper } from './academicSemester.constant';
+import {
+  AcademicSemesterNameCodeMapper,
+  AcademicSemesterSearchableFields,
+} from './academicSemester.constant';
 import { TAcademicSemester } from './academicSemester.interface';
 import { AcademicSemesterModel } from './academicSemester.model';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const CreateAcademicSemesterService = async (payload: TAcademicSemester) => {
   // check the semester name matches with code or not.
@@ -13,9 +17,23 @@ const CreateAcademicSemesterService = async (payload: TAcademicSemester) => {
   return result;
 };
 
-const GetAllAcademicSemestersService = async () => {
-  const result = await AcademicSemesterModel.find();
-  return result;
+const GetAllAcademicSemestersService = async (
+  query: Record<string, unknown>,
+) => {
+  const academicSemestersQuery = new QueryBuilder(
+    AcademicSemesterModel.find(),
+    query,
+  )
+    .search(AcademicSemesterSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fieldFilter();
+
+  const meta = await academicSemestersQuery.count();
+  const result = await academicSemestersQuery.modelQuery;
+
+  return { result, meta };
 };
 
 const GetSingleAcademinSemesterService = async (id: string) => {
