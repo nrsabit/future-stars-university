@@ -9,6 +9,7 @@ import { SemesterRegistrationModel } from '../semesterRegistration/semesterRegis
 import { CourseModel } from '../course/course.model';
 import { FacultyModel } from '../faculty/faculty.model';
 import { calculateGradeAndGradePoints } from './enrolledCourse.utils';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const CreateEnrolledCourseService = async (
   userId: string,
@@ -214,7 +215,7 @@ const UpdateEnrolledCourseService = async (
     const gradeAndMarks = calculateGradeAndGradePoints(totalNumber);
     modifiedData.grade = gradeAndMarks?.grade;
     modifiedData.gradePoints = gradeAndMarks?.gradePoints;
-    modifiedData.isCompleted = true
+    modifiedData.isCompleted = true;
   }
 
   if (payload.courseMarks && Object.entries(payload.courseMarks).length) {
@@ -232,7 +233,71 @@ const UpdateEnrolledCourseService = async (
   return result;
 };
 
+const getAllEnrolledCoursesService = async (
+  facultyId: string,
+  query: Record<string, unknown>,
+) => {
+  const faculty = await FacultyModel.findOne({ id: facultyId });
+
+  if (!faculty) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found !');
+  }
+
+  const enrolledCourseQuery = new QueryBuilder(
+    EnrolledCourseModel.find({
+      faculty: faculty._id,
+    }).populate(
+      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+    ),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fieldFilter();
+
+  const result = await enrolledCourseQuery.modelQuery;
+  const meta = await enrolledCourseQuery.count();
+
+  return {
+    meta,
+    result,
+  };
+};
+
+const getMyEnrolledCoursesService = async (
+  studentId: string,
+  query: Record<string, unknown>,
+) => {
+  const student = await StudentModel.findOne({ id: studentId });
+
+  if (!student) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Student not found !');
+  }
+
+  const enrolledCourseQuery = new QueryBuilder(
+    EnrolledCourseModel.find({ student: student._id }).populate(
+      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+    ),
+    query,
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fieldFilter();
+
+  const result = await enrolledCourseQuery.modelQuery;
+  const meta = await enrolledCourseQuery.count();
+
+  return {
+    meta,
+    result,
+  };
+};
+
 export const EnrolledCourseServices = {
   CreateEnrolledCourseService,
   UpdateEnrolledCourseService,
+  getAllEnrolledCoursesService,
+  getMyEnrolledCoursesService,
 };

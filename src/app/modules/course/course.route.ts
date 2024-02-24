@@ -32,20 +32,30 @@ router.patch(
 );
 router.put(
   '/:courseId/assign-faculties',
-  auth(USER_ROLES.superAdmin, USER_ROLES.admin, USER_ROLES.faculty),
+  auth(USER_ROLES.superAdmin, USER_ROLES.admin),
   validateRequest(CourseValidations.facultiesWithCourseValidationSchema),
   CourseControllers.assignFucultiesWithCourseController,
 );
+router.get(
+  '/:courseId/get-faculties',
+  auth(
+    USER_ROLES.superAdmin,
+    USER_ROLES.admin,
+    USER_ROLES.faculty,
+    USER_ROLES.student,
+  ),
+  CourseControllers.getCourseFacultyController,
+);
 router.delete(
   '/:courseId/remove-faculties',
-  auth(USER_ROLES.superAdmin, USER_ROLES.admin, USER_ROLES.faculty),
+  auth(USER_ROLES.superAdmin, USER_ROLES.admin),
   validateRequest(CourseValidations.facultiesWithCourseValidationSchema),
   CourseControllers.removeFucultiesWithCourseController,
 );
 router.delete(
   '/:id',
-  auth(USER_ROLES.superAdmin, USER_ROLES.admin, USER_ROLES.faculty),
-  CourseControllers.deleteCourseController, 
+  auth(USER_ROLES.superAdmin, USER_ROLES.admin),
+  CourseControllers.deleteCourseController,
 );
 
 export const CourseRoutes = router;

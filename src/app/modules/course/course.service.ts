@@ -20,8 +20,11 @@ const getAllCoursesService = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fieldFilter();
+
   const result = await courseQuery.modelQuery;
-  return result;
+  const meta = await courseQuery.count();
+
+  return { result, meta };
 };
 
 const getSingleCourseService = async (id: string) => {
@@ -115,6 +118,14 @@ const assignFucultiesWithCourseService = async (
   return result;
 };
 
+const getCourseFacultiesService = async (courseId: string) => {
+  const result = await CourseFacultyModel.findOne({
+    course: courseId,
+  }).populate('faculties');
+
+  return result;
+};
+
 const removeFucultiesFromCourseService = async (
   id: string,
   payload: Partial<TCourseFaculty>,
@@ -146,5 +157,6 @@ export const CourseServices = {
   deleteSingleCourseService,
   updateSingleCourseService,
   assignFucultiesWithCourseService,
+  getCourseFacultiesService,
   removeFucultiesFromCourseService,
 };
