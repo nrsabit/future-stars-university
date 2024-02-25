@@ -21,7 +21,8 @@ const getAllSemesterRegistrationsService = async (
     .paginate()
     .fieldFilter();
   const result = await semesterRegistrationQuery.modelQuery;
-  return result;
+  const meta = await semesterRegistrationQuery.count();
+  return { result, meta };
 };
 
 const getSingleSemesterRegistrationService = async (id: string) => {

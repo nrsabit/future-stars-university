@@ -13,7 +13,8 @@ const getAllSemesterRegistrationsController = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Semester Registrations are retrived Successfully',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
