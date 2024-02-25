@@ -20,7 +20,8 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
     .fieldFilter();
 
   const result = await facultyQuery.modelQuery;
-  return result;
+  const meta = await facultyQuery.count();
+  return { result, meta };
 };
 
 const getSingleFacultyFromDB = async (id: string) => {
